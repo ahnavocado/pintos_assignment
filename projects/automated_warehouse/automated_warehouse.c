@@ -66,20 +66,7 @@ void run_automated_warehouse(char **argv)
         }
         
 
-        // robot_count = 1;
-        // ret_ptr = strtok_r(argv[2], ":", &next_ptr); //initialize token parsing
-        // while(ret_ptr) {
-        //         //printf("ret_ptr = [%s]\n", ret_ptr);
-        //         char name_buffer[20];
-        //         snprintf(name_buffer,20,"R%d",robot_count);
-                
-        //         *idxs = robot_count;
-        //         // setRobot(&robots[robot_count-1], name_buffer, 5, 5, ret_ptr[1], 0);
-        //         threads[robot_count-1] = thread_create(name_buffer, 0, &test_thread, &idxs[robot_count-1]);
-        //         ret_ptr = strtok_r(NULL, ":", &next_ptr);
-        //         robot_count++;
-        // }
-
+ 
         // test case robots
         // robots = malloc(sizeof(struct robot) * 4);
         // setRobot(&robots[0], "R1", 5, 5, 0, 0);
