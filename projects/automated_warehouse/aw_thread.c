@@ -37,4 +37,16 @@ void block_thread(){
  */
 void unblock_threads(){
     // you must implement this
+     enum intr_level old_level;
+
+    old_level = intr_disable(); 
+
+    while (!list_empty(&blocked_threads)) {
+        struct list_elem *e = list_pop_front(&blocked_threads); 
+        struct thread *t = list_entry(e, struct thread, elem); 
+        thread_unblock(t);
+
+    intr_set_level(old_level); 
+    }
+
 }
