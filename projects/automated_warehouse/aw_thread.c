@@ -24,7 +24,9 @@ void block_thread(){
 
     // Code below is example
     enum intr_level old_level;
-    old_level = intr_disable ();
+    old_level = intr_disable (); 
+    struct thread *current_thread = thread_current(); // get current thread
+    list_push_back(&blocked_threads, &current_thread->elem);
     thread_block ();
     intr_set_level (old_level);
 }

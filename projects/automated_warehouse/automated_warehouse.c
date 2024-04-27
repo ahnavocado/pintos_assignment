@@ -83,5 +83,7 @@ void run_automated_warehouse(char **argv)
         // threads[3] = thread_create("R3", 0, &test_thread, &idxss[3]);
 
         // if you want, you can use main thread as a central control node
+        //pintos/threads/build
+        //../../utils/pintos automated_warehouse 5 2A:4C:2B:2C:3A
         
 }
