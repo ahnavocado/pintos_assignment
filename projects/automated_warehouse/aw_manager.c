@@ -48,7 +48,7 @@ void print_map(struct robot* __robots, int __number_of_robots){
     printf("STEP_INFO_START::%d\n", step);
     printf("MAP_INFO::\n");
     for (int row = 0; row < 6; row++){
-        for (int col = 0; col < 6; col++){
+        for (int col = 0; col < 7; col++){
             if (map_draw_default[row][col] == 'A' ||
                 map_draw_default[row][col] == 'B' ||
                 map_draw_default[row][col] == 'C' ||
