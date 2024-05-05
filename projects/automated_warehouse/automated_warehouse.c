@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "threads/init.h"
 #include "threads/malloc.h"
@@ -19,6 +20,7 @@ struct message_box* boxes_from_robots;
 
 struct robot* robots;
 int num_robot ;
+int path_map[100][20] = { 0, }; 
 
 void printMessage(struct message msg) {
     printf("Robot Status - ");
@@ -26,12 +28,12 @@ void printMessage(struct message msg) {
     printf("Column: %d  ", msg.col);
     printf("Payload: %d  ", msg.current_payload);
     printf("Req Payload: %d  ", msg.required_payload);
-    printf("Next Command: %d\n\n", msg.cmd);
+    printf("Next Command: %d\n", msg.cmd);
 }
 void send_message_from_robot(int robot_id, struct message msg) {
     //struct message_box* box = &boxes_from_robots[robot_id];
-    printMessage(msg);
-    printf("67890 - %d\n", robot_id);
+    //printMessage(msg);
+    //printf("67890 - %d\n", robot_id);
     boxes_from_robots[robot_id].msg = msg;
     if (!boxes_from_robots[robot_id].dirtyBit) {
         boxes_from_robots[robot_id].dirtyBit = 1; // new message created
@@ -42,12 +44,12 @@ void send_message_from_robot(int robot_id, struct message msg) {
 void send_message_from_central_control_node(int robot_id, struct message msg) {
     //struct message_box* box = &boxes_from_central_control_node[robot_id];
     
-    printMessage(msg);
-    printf("12345 - %d\n", robot_id);
-    if (!boxes_from_central_control_node[robot_id].dirtyBit) {
+    //printMessage(msg);
+    //printf("12345 - %d\n\n", robot_id);
+    //if (!boxes_from_central_control_node[robot_id].dirtyBit) {
         boxes_from_central_control_node[robot_id].msg = msg;
         boxes_from_central_control_node[robot_id].dirtyBit = 1; // new message written
-    }
+    // }
     
 }
 struct message receive_message_from_robot(int robot_id) {
@@ -57,14 +59,8 @@ struct message receive_message_from_robot(int robot_id) {
         printf("NO message from robot -- %d \n ",robot_id);
     }
     //struct message msg = box->msg;
-    printMessage(boxes_from_robots[robot_id].msg);
+    //printMessage(boxes_from_robots[robot_id].msg);
     boxes_from_robots[robot_id].dirtyBit = 0; // read msg
-    // for( int i = 0; i++; i < sizeof(boxes_from_robots) / sizeof(msg)){
-    //     struct message_box* box = &boxes_from_robots[i];
-    //     if(box -> dirtyBit == 1)
-    //     return msg;
-    // }
-    // unblock_threads();
     return boxes_from_robots[robot_id].msg;
 }
 struct message receive_message_central_control_node(int robot_id) {
@@ -75,7 +71,7 @@ struct message receive_message_central_control_node(int robot_id) {
         thread_sleep(100);
     }
     //struct message msg = box->msg;
-    printMessage(boxes_from_central_control_node[robot_id].msg);
+    //printMessage(boxes_from_central_control_node[robot_id].msg);
     boxes_from_central_control_node[robot_id].dirtyBit = 0; // read msg
     return boxes_from_central_control_node[robot_id].msg;
 }
@@ -99,38 +95,183 @@ void test_thread(void* aux){
         }
 }
 
+void create_path(int robot_idx, int package, int destination){
+    int count = 0;
+    int package_row, package_col, enterance_to_pkg; //enterance_to_pkg-> how to get into and come back from the package area | up first(1) or down first(-1)
+    //int dest_row, dest_col;
+    if (package == '1'){
+        package_row = 2;
+        package_col = 1;
+        enterance_to_pkg = 1;
+    }
+    else if (package == '2'){
+        package_row = 2;
+        package_col = 3;
+        enterance_to_pkg = 1;
+    }
+    else if (package == '3'){
+        package_row = 2;
+        package_col = 4;
+        enterance_to_pkg = 1;
+    }
+    else if (package == '4'){
+        package_row = 2;
+        package_col = 5;
+        enterance_to_pkg = 1;
+    }
+    else if (package == '5'){
+        package_row = 3;
+        package_col = 1;
+        enterance_to_pkg = -1;
+    }
+    else if (package == '6'){
+        package_row = 3;
+        package_col = 3;
+        enterance_to_pkg = -1;
+    }
+    else if (package == '7'){
+        package_row = 3;
+        package_col = 4;
+        enterance_to_pkg = -1;
+    }
+    
+    //------------------------------------------
+    path_map[robot_idx][count] = 12;
+    count++;
+    path_map[robot_idx][count] = 12;
+    count++;
+    for (int i = 0; i < abs(3 - package_row); i++){
+        path_map[robot_idx][count] = 12;
+        count++;
+    }
+    for (int i = 0; i < abs(5 - package_col); i++){
+        path_map[robot_idx][count] = 9;
+        count++;
+    }
+
+    //----------------------------------
+
+    if (enterance_to_pkg == 1){
+        path_map[robot_idx][count] = 12;
+        count++;
+        //current payload +1
+        path_map[robot_idx][count] = 6;
+        count++;
+    }
+    else if (enterance_to_pkg == -1){
+        path_map[robot_idx][count] = 6;
+        count++;
+        //current payload +1
+        path_map[robot_idx][count] = 12;
+        count++;
+    }
+    //-------------------------------------
+
+    if (package_row <= 2){
+        while(package_row != 2){
+            path_map[robot_idx][count] = 6;
+            package_row ++;
+            count++;
+        }
+    }
+    else if (package_row > 2){
+        while(package_row != 2){
+            path_map[robot_idx][count] = 12;
+            package_row--;
+            count++;
+        }
+    }
+
+    if (package_col <= 2){
+        while(package_col != 2){
+            path_map[robot_idx][count] = 3;
+            package_col++;
+            count++;
+        }
+    }
+    else if (package_col > 2){
+        while(package_col != 2){
+            path_map[robot_idx][count] = 9;
+            package_col--;
+            count++;
+        }
+    }
+
+    if (destination == 'A'){
+        path_map[robot_idx][count] = 12;
+        count++;
+        path_map[robot_idx][count] = 12;
+        count++;
+        path_map[robot_idx][count] = 12;
+        count++;
+    }
+    else if (destination == 'B'){
+        path_map[robot_idx][count] = 9;
+        count++;
+        path_map[robot_idx][count] = 9;
+        count++;
+    }
+    else if (destination == 'C'){
+        path_map[robot_idx][count] = 6;
+        count++;
+        path_map[robot_idx][count] = 6;
+        count++;
+        path_map[robot_idx][count] = 6;
+        count++;
+    }
+}
+
 // code for central control node thread
 void cnt_thread(){
         int flag = 0;
-        while(1){
-            print_map(robots, 5);
-            for(int i = 1; i <= num_robot; i++){
-                printf("sending msg\n");
-                struct message msg = {0,0,0,0,12};
-                send_message_from_central_control_node(i,msg);
-            }
-            unblock_threads(); // unblock all threads
-
-            while(flag == 0){
-                for (int j = 1; j <= num_robot ; j++){
-                    if (boxes_from_robots[j].dirtyBit == 0){
-                        flag = 0;
-                        break;
-                    }
-                    flag = 1;
+        
+        for(int current_robot = 1; current_robot <= num_robot; current_robot++){
+            for(int command = 0;;command++){
+                if(path_map[current_robot][command] == 0){
+                    break;
                 }
-                printf("waiting for reply\n");
+                //print_map(robots, 5);
+
+                struct message msg = {0,0,0,0,0};
+                for(int i = 1; i <= num_robot ; i++){
+                    printf("sending msg\n");
+                    send_message_from_central_control_node(i,msg);
+                }
+                
+                struct message mod_msg = {0,0,0,0,path_map[current_robot][command]};
+                send_message_from_central_control_node(current_robot,mod_msg);
+                //printf("|||||||||%d|||||||%d|||||%d\n",current_robot,command,path_map[current_robot][command]);
+
+                unblock_threads(); // unblock all threads
+
+                // wait for reply
+                while(flag == 0){
+                    for (int j = 1; j <= num_robot ; j++){
+                        if (boxes_from_robots[j].dirtyBit == 0){
+                            flag = 0;
+                            break;
+                        }
+                        flag = 1;
+                    }
+                    printf("waiting for reply\n");
+                    thread_sleep(1000);
+                    printf("waiting for reply2\n");
+                }
+                flag = 0;
+
+                // read reply msg
+                for(int i = 1; i <= num_robot; i++){
+                    printf("reading msg\n");
+                    receive_message_from_robot(i);
+                }
+                print_map(robots, 5);
                 thread_sleep(1000);
+                // block_thread();
+
             }
-            flag = 0;
-            for(int i = 1; i <= num_robot; i++){
-                printf("reading msg\n");
-                receive_message_from_robot(i);
-            }
-            print_map(robots, 5);
-            thread_sleep(1000);
-            // block_thread();
         }
+        
+    
         
 }
 
@@ -140,8 +281,6 @@ void robot_thread(void* aux){
         int idx = *((int *)aux);
         while(1){
             struct message receive_msg = receive_message_central_control_node(idx);
-            
-            // struct robot* __robot = &robots[idx];
             
             if(receive_msg.cmd == 3){
                 robots[idx].col += 1;
@@ -157,6 +296,7 @@ void robot_thread(void* aux){
             }
             struct message send_msg =  {robots[idx].row,robots[idx].col,robots[idx].current_payload,robots[idx].required_payload};
             send_message_from_robot(idx, send_msg);
+            
             //block_thread();
         }
 
@@ -182,6 +322,7 @@ void run_automated_warehouse(char **argv)
         
         
         // make robot
+        
         robots = malloc(sizeof(struct robot) * atoi(argv[1])); // get number of robots
         boxes_from_central_control_node = malloc(sizeof(struct message) * atoi(argv[1])); // Dynamic allocation msg box
         boxes_from_robots = malloc(sizeof(struct message) * atoi(argv[1])); // Dynamic allocation msg box
@@ -199,11 +340,22 @@ void run_automated_warehouse(char **argv)
                 char name_buffer[4];
                 snprintf(name_buffer,4,"R%d",robot_count);
                 *idxs = robot_count;
-                setRobot(&robots[robot_count-1], name_buffer, 5, 5, ret_ptr[1], 0);
-                threads[robot_count] = thread_create(name_buffer, 0, &robot_thread, &idxs[robot_count-1]); // thread idx starts from 1 
+                setRobot(&robots[robot_count], name_buffer, 5, 5, ret_ptr[0], 0);
+                threads[robot_count-1] = thread_create(name_buffer, 0, &robot_thread, &idxs[robot_count-1]); // thread idx starts from 1 
+                create_path(robot_count, ret_ptr[0],ret_ptr[1]);
                 ret_ptr = strtok_r(NULL, ":", &next_ptr);
                 robot_count++;
                 
+        }
+
+        printf("--------------------------------------------------------------\n");
+        for (int i = 0; i < 7; i++)    
+        {
+            for (int j = 0; j < 20; j++)    
+            {
+                printf("%d ", path_map[i][j]); 
+            }
+            printf("\n");                
         }
         
         
